@@ -6,9 +6,6 @@ const { signToken } = require('../utils/auth');
 
 const resolvers = {
   Query: {
-    // users: async (parent, args) => {
-    //   return await User.findById(args.id).populate('savedBooks');
-    // },
     me: async (parent, args, context) => {
         if (context.user) {
           return User.findOne({ _id: context.user._id });
@@ -22,7 +19,8 @@ const resolvers = {
         const token = signToken(user);
         return { token, user };
       },
-    login: async (parent, { email, password }) => {
+    
+      login: async (parent, { email, password }) => {
       const user = await User.findOne({ email });
   
       if (!user) {
@@ -37,6 +35,7 @@ const resolvers = {
   
       return { token, user };
     },
+    
     saveBook: async (parent, { bookId, authors, description, image, link, title }, context) => {
       if (context.user) {  
         return User.findOneAndUpdate(
