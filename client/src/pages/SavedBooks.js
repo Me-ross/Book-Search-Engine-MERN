@@ -31,9 +31,7 @@ const SavedBooks = () => {
     try {
       // Execute mutation and pass in defined parameter data as variables
       const { data } = await removeBook({
-        variables: { 
-          bookId: data.bookId
-        },
+        variables: { bookId },
       });
 
       // const updatedUser = await response.json();
@@ -46,9 +44,10 @@ const SavedBooks = () => {
   };
 
   // if data isn't here yet, say so
-  // if (!userDataLength) {
-  //   return <h2>LOADING...</h2>;
-  // }
+  if (loading) {
+    return <h2>LOADING...</h2>;
+  }
+
 
   return (
     <>
@@ -60,9 +59,6 @@ const SavedBooks = () => {
       <Container>
          {/* loading comes from useQuery parameter above- means if we are waiting for the query to load then reurn loading... otherwise go ahead and display the data */}
       <div>
-      {/* {loading ? (
-          <div>Loading...</div>
-        ) : (       */}
         <h2>
           {/* not sure why above line is red!!
           next line should be - ?? userData={me.bookCount} ?? */}
@@ -87,7 +83,6 @@ const SavedBooks = () => {
             );
           })}
         </CardColumns>
-        )}
         </div>
         {/* error message collected once the mutation was invoked above */}
         {error && (

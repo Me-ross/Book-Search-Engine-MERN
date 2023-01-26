@@ -73,14 +73,7 @@ const SearchBooks = () => {
     try {
       // Execute mutation and pass in defined parameter data as variables
       const { data } = await saveBook({
-        variables: { 
-          bookId: data.bookId,
-          authors: data.authors,
-          description: data.description,
-          title: data.title,
-          image: data.image,
-          link: data.link
-        },
+        variables: { ...bookToSave },
       });
 
       // if (!response.ok) {
