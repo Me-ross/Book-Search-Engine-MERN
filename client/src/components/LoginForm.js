@@ -12,7 +12,8 @@ const LoginForm = () => {
   const [userFormData, setUserFormData] = useState({ email: '', password: '' });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [login] = useMutation(LOGIN_USER);
+
+  const [login, , { error }] = useMutation(LOGIN_USER);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -97,6 +98,12 @@ const LoginForm = () => {
           variant='success'>
           Submit
         </Button>
+             {/* error message collected once the mutation was invoked above at line#58 */}
+             {error && (
+          <div className="col-12 my-3 bg-danger text-white p-3">
+            Something went wrong...
+          </div>
+        )}
       </Form>
     </>
   );
