@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Jumbotron, Container, Col, Form, Button, Card, CardColumns } from 'react-bootstrap';
 
+import { useMutation } from '@apollo/client';
+import { SAVE_BOOK } from '../utils/mutations';
+
 import Auth from '../utils/auth';
 import { saveBook, searchGoogleBooks } from '../utils/API';
 import { saveBookIds, getSavedBookIds } from '../utils/localStorage';
@@ -51,6 +54,8 @@ const SearchBooks = () => {
       console.error(err);
     }
   };
+// Invoke `useMutation()` hook to return a Promise-based function and data about the SAVE_BOOK mutation
+  const [saveBook, { error }] = useMutation(SAVE_BOOK);
 
   // create function to handle saving a book to our database
   const handleSaveBook = async (bookId) => {
@@ -64,12 +69,23 @@ const SearchBooks = () => {
       return false;
     }
 
+  // Since mutation function is async, wrap in a `try...catch` to catch any network errors from throwing due to a failed request.
     try {
-      const response = await saveBook(bookToSave, token);
+      // Execute mutation and pass in defined parameter data as variables
+      const { data } = await saveBook({
+        variables: { 
+          bookId: data.bookId,
+          authors: data.authors,
+          description: data.description,
+          title: data.title,
+          image: data.image,
+          link: data.link
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
+      // if (!response.ok) {
+      //   throw new Error('something went wrong!');
+      // }
 
       // if book successfully saves to user's account, save book id to state
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
@@ -137,6 +153,12 @@ const SearchBooks = () => {
             );
           })}
         </CardColumns>
+        {/* error message collected once the mutation was invoked above at line#58 */}
+        {error && (
+          <div className="col-12 my-3 bg-danger text-white p-3">
+            Something went wrong...
+          </div>
+        )}
       </Container>
     </>
   );

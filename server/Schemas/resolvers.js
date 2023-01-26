@@ -13,6 +13,7 @@ const resolvers = {
         throw new AuthenticationError('You need to be logged in!');
     },
   },
+  
   Mutations: {
     addUser: async (parent, { username, email, password }) => {
         const user = await User.create({ username, email, password });

@@ -1,42 +1,25 @@
 import React, { useState, useEffect } from 'react';
+// import useQuery and useMutation hooks from apollolibrary so you can use the ./utils/queries and .utils/queries/mutations
+import { useQuery, useMutation } from '@apollo/client';
+
 import { Jumbotron, Container, CardColumns, Card, Button } from 'react-bootstrap';
 
-import { getMe, deleteBook } from '../utils/API';
+// GET-ME queri and REMOVE-BOOk mutation are imported from utils
+import { GET_ME } from '../utils/queries';
+import { REMOVE_BOOK} from '../utils/mutations';
+
 import Auth from '../utils/auth';
 import { removeBookId } from '../utils/localStorage';
 
 const SavedBooks = () => {
-  const [userData, setUserData] = useState({});
+  // hook useQuery is used to execute the GET-ME query - returned object of the hook will always include a loading and data properties
+  const { loading, data } = useQuery(GET_ME);
+  // store the returned data in a variable userData that will be referred to in the jsx that is returned below.  ? syntax means if the data is ready then return the data.me details specified in the queries file lines 7-17, Otherwise (||) return an empty array []
+  const userData = data?.me || [];
 
-  // use this to determine if `useEffect()` hook needs to run again
-  const userDataLength = Object.keys(userData).length;
-
-  useEffect(() => {
-    const getUserData = async () => {
-      try {
-        const token = Auth.loggedIn() ? Auth.getToken() : null;
-
-        if (!token) {
-          return false;
-        }
-
-        const response = await getMe(token);
-
-        if (!response.ok) {
-          throw new Error('something went wrong!');
-        }
-
-        const user = await response.json();
-        setUserData(user);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    getUserData();
-  }, [userDataLength]);
-
-  // create function that accepts the book's mongo _id value as param and deletes the book from the database
+  // Invoke `useMutation()` hook to return a Promise-based function and data about the REMOVE_BOOK mutation
+  const [removeBook, { error }] = useMutation(REMOVE_BOOK);
+  
   const handleDeleteBook = async (bookId) => {
     const token = Auth.loggedIn() ? Auth.getToken() : null;
 
@@ -44,15 +27,17 @@ const SavedBooks = () => {
       return false;
     }
 
+     // Since mutation function is async, wrap in a `try...catch` to catch any network errors from throwing due to a failed request.
     try {
-      const response = await deleteBook(bookId, token);
+      // Execute mutation and pass in defined parameter data as variables
+      const { data } = await removeBook({
+        variables: { 
+          bookId: data.bookId
+        },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
-      }
-
-      const updatedUser = await response.json();
-      setUserData(updatedUser);
+      // const updatedUser = await response.json();
+      // setUserData(updatedUser);
       // upon success, remove book's id from localStorage
       removeBookId(bookId);
     } catch (err) {
@@ -61,9 +46,9 @@ const SavedBooks = () => {
   };
 
   // if data isn't here yet, say so
-  if (!userDataLength) {
-    return <h2>LOADING...</h2>;
-  }
+  // if (!userDataLength) {
+  //   return <h2>LOADING...</h2>;
+  // }
 
   return (
     <>
@@ -73,7 +58,14 @@ const SavedBooks = () => {
         </Container>
       </Jumbotron>
       <Container>
+         {/* loading comes from useQuery parameter above- means if we are waiting for the query to load then reurn loading... otherwise go ahead and display the data */}
+      <div>
+      {/* {loading ? (
+          <div>Loading...</div>
+        ) : (       */}
         <h2>
+          {/* not sure why above line is red!!
+          next line should be - ?? userData={me.bookCount} ?? */}
           {userData.savedBooks.length
             ? `Viewing ${userData.savedBooks.length} saved ${userData.savedBooks.length === 1 ? 'book' : 'books'}:`
             : 'You have no saved books!'}
@@ -95,6 +87,14 @@ const SavedBooks = () => {
             );
           })}
         </CardColumns>
+        )}
+        </div>
+        {/* error message collected once the mutation was invoked above */}
+        {error && (
+          <div className="col-12 my-3 bg-danger text-white p-3">
+            Something went wrong...
+          </div>
+        )}
       </Container>
     </>
   );
