@@ -50,6 +50,8 @@ const SignupForm = () => {
       // const { token, user } = await response.json();
       // console.log(user);
       // Auth.login(token);
+
+      Auth.login(data.addUser.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);
@@ -115,12 +117,7 @@ const SignupForm = () => {
           variant='success'>
           Submit
         </Button>
-           {/* error message collected once the mutation was invoked above at line#58 */}
-           {error && (
-          <div className="col-12 my-3 bg-danger text-white p-3">
-            Something went wrong...
-          </div>
-        )}
+          
       </Form>
     </>
   );
